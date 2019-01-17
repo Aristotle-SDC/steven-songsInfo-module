@@ -1,38 +1,10 @@
-const Sequelize = require('sequelize');
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/27017')
 
-// setup connection
-const db = new Sequelize('democloud', 'root', '', {
-  host: 'localhost',
-  dialect: 'mysql'
-});
+var db = mongoose.connection;
 
-// test connection
-db.authenticate()
-  .then(() => {
-    console.log('db connection success!');
-  })
-  .catch(err => {
-    console.log('NO db connection!', err);
-  });
+db.on('open', () => {
+  console.log('connected');
+})
 
-// songsinfo table schema
-const SongsInfo = db.define(
-  'SongsInfo',
-  {
-    plays: Sequelize.INTEGER,
-    likes: Sequelize.INTEGER,
-    reposts: Sequelize.INTEGER,
-    description: Sequelize.STRING,
-    artist: Sequelize.STRING,
-    artist_followers: Sequelize.INTEGER,
-    artist_tracks: Sequelize.INTEGER
-  },
-  {
-    timestamps: false
-  }
-);
-
-// applies SongsInfo table to democloud db
-db.sync();
-
-module.exports = { SongsInfo };
+module.exports = db;

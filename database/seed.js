@@ -1,52 +1,71 @@
-const faker = require('faker');
-const db = require('./index.js');
+const promise = require('bluebird');
+const options = { promiseLib: promise };
+const pgp = require('pg-promise')(options);
+const data = require('./dataGen.js');
+// const db = require('./index.js');
+var mongoose = require('mongoose');
 
-const rndPlays = [];
-const rndLikes = [];
-const rndReposts = [];
-const rndDesc = [];
-const rndArt = [];
-const rndArtFol = [];
-const rndArtTra = [];
+mongoose.connect('mongodb://localhost:27017/songinfo', {useNewUrlParser: true})
+.then(() => {
+  console.log("Connected");
+})
+.catch(err => console.log(err));
 
-const rndGen = (type, arr) => {
-  let rndData;
-  for (let i = 0; i <= 99; i++) {
-    if (
-      type === 'plays' ||
-      type === 'likes' ||
-      type === 'reposts' ||
-      type === 'artistFollowers' ||
-      type === 'artistTracks'
-    ) {
-      rndData = faker.random.number();
+mongoose.connection.once('open', () => {
+  mongoose.connection.collections.songList.drop((err) => {
+    if (err) {
+      console.log("Error dropping existing documents in songList");
     }
-    if (type === 'descriptions') {
-      rndData = faker.lorem.sentence();
+    if (!err) {
+      console.log('Dropped existing documents in songList');
     }
-    if (type === 'artists') {
-      rndData = faker.internet.userName();
-    }
-    arr.push(rndData);
-  }
-};
-
-rndGen('plays', rndPlays);
-rndGen('likes', rndLikes);
-rndGen('reposts', rndReposts);
-rndGen('artistFollowers', rndArtFol);
-rndGen('artistTracks', rndArtTra);
-rndGen('descriptions', rndDesc);
-rndGen('artists', rndArt);
-
-for (let i = 0; i <= 99; i++) {
-  db.SongsInfo.create({
-    plays: rndPlays[i],
-    likes: rndLikes[i],
-    reposts: rndReposts[i],
-    description: rndDesc[i],
-    artist: rndArt[i],
-    artist_followers: rndArtFol[i],
-    artist_tracks: rndArtTra[i]
   });
-}
+});
+
+// Create schema
+var songListSchema = new mongoose.Schema({
+  id: Number,
+  plays: Number,
+  likes: Number,
+  reposts: Number,
+  description: String,
+  artist: String,
+  artistFollowers: Number,
+  artistTracks: Number
+});
+
+// Compile schema into a model
+var songList = mongoose.model('songList', songListSchema, 'songList');
+
+  var chunkSize = 10000;
+  var numOfChunks = 1000;
+  console.time('Seeding took');
+
+  const insertData = (prevIndex) => {
+    if (prevIndex < numOfChunks) {
+      var songData = [];
+      for(var i= 1; i <= chunkSize; i++) {
+        var index = prevIndex * chunkSize + i;
+        songData.push({
+          id: index,
+          plays: data.Plays[index-1],
+          likes: data.Likes[index-1],
+          reposts: data.Reposts[index-1],
+          description: data.Desc[index-1],
+          artist: data.Art[index-1],
+          artistfollowers: data.ArtFol[index-1],
+          artisttracks: data.ArtTra[index-1],
+        });
+      }
+      console.log('Number of chunks added:', prevIndex);
+      songList.insertMany(songData, () => {
+        if(prevIndex === numOfChunks - 1) { console.timeEnd('Seeding took')};
+        insertData(++prevIndex);
+      });
+      return;
+    }
+  }
+
+insertData(0);
+
+
