@@ -2,6 +2,7 @@ const promise = require('bluebird');
 const options = { promiseLib: promise };
 const pgp = require('pg-promise')(options);
 const data = require('./dataGen.js');
+const songList = require('./models/SongList.js');
 // const db = require('./index.js');
 var mongoose = require('mongoose');
 
@@ -22,21 +23,6 @@ mongoose.connection.once('open', () => {
   });
 });
 
-// Create schema
-var songListSchema = new mongoose.Schema({
-  id: Number,
-  plays: Number,
-  likes: Number,
-  reposts: Number,
-  description: String,
-  artist: String,
-  artistFollowers: Number,
-  artistTracks: Number
-});
-
-// Compile schema into a model
-var songList = mongoose.model('songList', songListSchema, 'songList');
-
   var chunkSize = 10000;
   var numOfChunks = 1000;
   console.time('Seeding took');
@@ -53,8 +39,8 @@ var songList = mongoose.model('songList', songListSchema, 'songList');
           reposts: data.Reposts[index-1],
           description: data.Desc[index-1],
           artist: data.Art[index-1],
-          artistfollowers: data.ArtFol[index-1],
-          artisttracks: data.ArtTra[index-1],
+          artistFollowers: data.ArtFol[index-1],
+          artistTracks: data.ArtTra[index-1],
         });
       }
       console.log('Number of chunks added:', prevIndex);

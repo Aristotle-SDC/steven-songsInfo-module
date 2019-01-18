@@ -33,7 +33,7 @@ class App extends React.Component {
 
     // console.log('ID', id);
     axios
-      .get(`/api/songs-info/${songId}`)
+      .get(`/api/songInfo/${songId}`)
       .then(res => {
         // console.log(res.data);
         this.setState({
@@ -46,6 +46,7 @@ class App extends React.Component {
   }
 
   render() {
+    console.log('this', this.state.songsInfo)
     return (
       <div>
         {this.state.songsInfo.map(songInfo => {
@@ -60,8 +61,8 @@ class App extends React.Component {
               <div className="container">
                 <Artist
                   artist={songInfo.artist}
-                  artFol={songInfo.artist_followers}
-                  artTra={songInfo.artist_tracks}
+                  artFol={songInfo.artistFollowers}
+                  artTra={songInfo.artistTracks}
                 />
                 <div className="desc-padding">
                   <SongsDesc desc={songInfo.description} />

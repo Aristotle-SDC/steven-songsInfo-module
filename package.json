@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "webpack -d --watch",
-    "db": "psql -U root songinfo < schema.sql",
     "start": "nodemon server/index.js",
     "seed": "node --max-old-space-size=8192 database/seed.js"
   },
