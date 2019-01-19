@@ -53,7 +53,7 @@ class App extends React.Component {
           return (
             <div>
               <SongsInfo
-                key={songInfo.id}
+                id={songInfo.id}
                 plays={songInfo.plays}
                 likes={songInfo.likes}
                 reposts={songInfo.reposts}

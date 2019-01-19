@@ -1,5 +1,6 @@
 import React from 'react';
 import SharePopup from './SharePopup.jsx';
+const axios = require('axios');
 
 const styles = {
   like: { color: '#333' },
@@ -32,18 +33,40 @@ class SongsInfo extends React.Component {
     this.closeMore = this.closeMore.bind(this);
   }
 
+  likeUpdater () {
+    axios({
+      method: 'put',
+      url: `/api/songInfo/${this.props.id}`,
+      data: {
+        id: this.props.id,
+        likes: this.state.likes
+      }
+    })
+    .then(res => {
+      console.log('Updated info');
+    })
+  }
+
   likeClick() {
     this.setState(prevState => ({
       likeBtnOff: !prevState.likeBtnOff,
       likes: this.state.likes + 1
-    }));
+    }), () => {
+      console.log('Liked');
+      this.likeUpdater();
+    });
+
   }
 
+  // Update this too
   likedClick() {
     this.setState(prevState => ({
       likeBtnOff: !prevState.likeBtnOff,
       likes: this.state.likes - 1
-    }));
+    }), () => {
+      console.log('Unliked.');
+      this.likeUpdater();
+    });
   }
 
   repostClick() {
